@@ -1,10 +1,45 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>{{ title }}</h1>
-    <div id='chart' class='chart'></div>
-    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <div class="container mt-4">
+        <h1>{{ title }}</h1>
+        <div class="card">
+            <div class="card-body">
+                <div id='chart' class='chart'></div>
+            </div>
+        </div>
+    </div>
+    <script src='https://cdn.plot.ly/plotly-2.32.0.min.js'></script> 
     <script type='text/javascript'>
-        var graphs = {{graphJSON | safe}};
-        Plotly.plot('chart',graphs,{});
+        function renderPlotlyChart(chartId, graphDataObject) {
+            var chartDiv = document.getElementById(chartId);
+            if (!chartDiv) {
+                console.error("Chart container not found: " + chartId);
+                return;
+            }
+
+            try {
+                if (graphDataObject && typeof graphDataObject === 'object') {
+                    if (Object.keys(graphDataObject).length === 0 && graphDataObject.constructor === Object) {
+                        chartDiv.innerHTML = '<div class="alert alert-info" role="alert">No data to display for this chart (empty graph object).</div>';
+                    } else if (graphDataObject.data && graphDataObject.layout !== undefined) {
+                        Plotly.newPlot(chartId, graphDataObject.data, graphDataObject.layout, {responsive: true});
+                    } else if (Array.isArray(graphDataObject) && graphDataObject.length > 0) {
+                        Plotly.newPlot(chartId, graphDataObject, {}, {responsive: true});
+                    } else {
+                         console.warn("Graph data for " + chartId + " is an object, but not in expected Plotly format or is empty after all checks:", graphDataObject);
+                        chartDiv.innerHTML = '<div class="alert alert-warning" role="alert">Chart data is malformed or unexpectedly empty.</div>';
+                    }
+                } else {
+                    console.log("No valid graph data (not an object or null/undefined) for " + chartId + ":", graphDataObject);
+                    chartDiv.innerHTML = '<div class="alert alert-info" role="alert">No data available to display for this chart.</div>';
+                }
+            } catch (e) {
+                console.error("Error rendering chart " + chartId + ": ", e);
+                chartDiv.innerHTML = '<div class="alert alert-danger" role="alert">Error displaying chart. Check console for details.</div>';
+            }
+        }
+        
+        var rawGraphData = {{ graphJSON | safe }};
+        renderPlotlyChart('chart', rawGraphData);
     </script>
 {% endblock %}

@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ page_title }}</h1>
+    <p class="lead">{{ plot_title }}</p>
+    <hr>
+    <form method="POST" action="{{ url_for('interactive_scatter') }}" class="form-row align-items-end mb-3">
+        <div class="col-md-3 form-group">
+            <label for="x_var">X-Axis (Census Data):</label>
+            <select name="x_var" id="x_var" class="form-control form-control-sm">
+                {% for val, display in census_vars.items() %}
+                <option value="{{ val }}" {% if val == selected_x %}selected{% endif %}>{{ display }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 form-group">
+            <label for="y_var">Y-Axis (Party Vote Share):</label>
+            <select name="y_var" id="y_var" class="form-control form-control-sm">
+                {% for val, display in party_shares.items() %}
+                <option value="{{ val }}" {% if val == selected_y %}selected{% endif %}>{{ display }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 form-group">
+            <label for="color_var">Color Points By:</label>
+            <select name="color_var" id="color_var" class="form-control form-control-sm">
+                <option value="">None</option>
+                {% for val, display in color_vars.items() %}
+                <option value="{{ val }}" {% if val == selected_color %}selected{% endif %}>{{ display }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-auto form-group">
+            <button type="submit" class="btn btn-primary btn-sm">Update Plot</button>
+        </div>
+    </form>
+
+    <div class="card">
+        <div class="card-body">
+            <div id='chart_scatter' class='chart'></div>
+        </div>
+    </div>
+    <div class="explanation mt-2">
+        <p><small>Explore correlations between census demographics and party performance. Hover over points for constituency details.</small></p>
+    </div>
+</div>
+
+<script src='https://cdn.plot.ly/plotly-2.32.0.min.js'></script>
+<script type='text/javascript'>
+    function renderPlotly(chartId, graphDataObject) { 
+        const chartDiv = document.getElementById(chartId);
+        if (!chartDiv) { console.error("Div " + chartId + " not found."); return; }
+        try {
+            if (graphDataObject && typeof graphDataObject === 'object') {
+                if (Object.keys(graphDataObject).length === 0 && graphDataObject.constructor === Object) {
+                    chartDiv.innerHTML = '<div class="alert alert-info">No data to display for this chart.</div>';
+                } else if (graphDataObject.data && graphDataObject.layout !== undefined) {
+                    Plotly.newPlot(chartId, graphDataObject.data, graphDataObject.layout, {responsive: true});
+                } else {
+                    console.warn("Malformed chart data for " + chartId + ":", graphDataObject);
+                    chartDiv.innerHTML = '<div class="alert alert-warning">Malformed chart data.</div>';
+                }
+            } else {
+                 console.warn("No valid chart data object for " + chartId + ":", graphDataObject);
+                 chartDiv.innerHTML = '<div class="alert alert-info">No data available for this chart.</div>';
+            }
+        } catch (e) {
+            console.error("Plotly error for " + chartId + ":", e, "Data received:", graphDataObject);
+            chartDiv.innerHTML = '<div class="alert alert-danger">Error rendering chart.</div>';
+        }
+    }
+    renderPlotly('chart_scatter', {{ graphJSON | safe }});
+</script>
+{% endblock %}

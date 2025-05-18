@@ -1,0 +1,16 @@
+# Flask and extensions
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-WTF==1.2.1
+SQLAlchemy==2.0.29
+
+# Data handling and numerical operations
+pandas==2.2.2
+numpy==1.26.4
+scipy==1.13.0
+
+# Statistical models
+statsmodels==0.14.1
+
+# Plotting and visualization
+plotly==5.22.0

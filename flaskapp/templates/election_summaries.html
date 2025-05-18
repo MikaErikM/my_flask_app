@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ page_title }}</h1>
+    <p class="lead">Overview of national voting patterns and regional demographic & voting averages.</p>
+    <hr>
+
+    <!-- National Vote Totals -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>National Vote Totals (2019 GE)</h3>
+        </div>
+        <div class="card-body">
+            <div id='chart_national_votes' class='chart_medium'></div>
+        </div>
+    </div>
+
+    <hr class="my-4">
+
+    <!-- Regional Summaries -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Regional Summaries</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('election_summaries') }}" class="form-inline mb-3">
+                <div class="form-group mr-2">
+                   <label for="region_select" class="mr-2">Select Region:</label>
+                   <select name="region_select" id="region_select" class="form-control form-control-sm">
+                       {% for region in regions %}
+                       <option value="{{ region }}" {% if region == selected_region %}selected{% endif %}>{{ region }}</option>
+                       {% endfor %}
+                   </select>
+               </div>
+               <button type="submit" class="btn btn-primary btn-sm">View Region</button>
+           </form>
+           <div class="row mt-3">
+               <div class="col-lg-6 mb-3">
+                   <h4>{{ title_reg_shares }}</h4>
+                   <div id='chart_regional_shares' class='chart_medium'></div>
+               </div>
+               <div class="col-lg-6 mb-3">
+                   <h4>{{ title_reg_census }}</h4>
+                   <div id='chart_regional_census' class='chart_medium'></div>
+               </div>
+           </div>
+        </div>
+    </div>
+</div>
+
+<script src='https://cdn.plot.ly/plotly-2.32.0.min.js'></script>
+<script type='text/javascript'>
+    function renderPlotly(chartId, graphDataObject) { 
+        const chartDiv = document.getElementById(chartId);
+        if (!chartDiv) { console.error("Div " + chartId + " not found."); return; }
+        try {
+            if (graphDataObject && typeof graphDataObject === 'object') {
+                if (Object.keys(graphDataObject).length === 0 && graphDataObject.constructor === Object) {
+                    chartDiv.innerHTML = '<div class="alert alert-info">No data to display for this chart.</div>';
+                } else if (graphDataObject.data && graphDataObject.layout !== undefined) {
+                    Plotly.newPlot(chartId, graphDataObject.data, graphDataObject.layout, {responsive: true});
+                } else {
+                    console.warn("Malformed chart data for " + chartId + ":", graphDataObject);
+                    chartDiv.innerHTML = '<div class="alert alert-warning">Malformed chart data.</div>';
+                }
+            } else {
+                console.warn("No valid chart data object for " + chartId + ":", graphDataObject);
+                chartDiv.innerHTML = '<div class="alert alert-info">No data available for this chart.</div>';
+            }
+        } catch (e) {
+            console.error("Plotly error for " + chartId + ":", e, "Data received:", graphDataObject);
+            chartDiv.innerHTML = '<div class="alert alert-danger">Error rendering chart.</div>';
+        }
+    }
+
+    renderPlotly('chart_national_votes', {{ graphJSON_national_votes | safe }});
+    renderPlotly('chart_regional_shares', {{ graphJSON_regional_shares | safe }});
+    renderPlotly('chart_regional_census', {{ graphJSON_regional_census | safe }});
+</script>
+<style>
+    .chart { min-height: 450px; width:100%;}
+    .chart_medium { min-height: 400px; width:100%;}
+</style>
+{% endblock %}

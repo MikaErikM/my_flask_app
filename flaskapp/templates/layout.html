@@ -1,38 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    {% if title %}
+        <title>My Flask App - {{ title }}</title>
+    {% else %}
+        <title>My Flask App</title>
+    {% endif %}
+    <style>
+        body { padding-top: 56px; }
+        .chart { min-height: 450px; width:100%;}
+        .card-header h3, .card-header h4 { font-size: 1.3rem; margin-bottom: 0;}
+    </style>
 </head>
 <body>
-<header>
-    <div id="container">
-        <h1 class="logo">My web app</h1>
-        <strong>
-            <nav>
-                <ul class="menu">
-                    <li><a href="{{ url_for('home') }}">Home</a></li>
-                    <li><a href="{{ url_for('about') }}">About</a></li>
-                    <li><a href="{{ url_for('new_post') }}">New post</a></li>
-                    <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-                </ul>
-            </nav>
-        </strong>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('home') }}">My Web App</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('about') }}">About</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('new_post') }}">New Post</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Site Views</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('interactive_scatter') }}">Interactive Scatter</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('election_summaries') }}">Election Summaries</a></li>
+            </ul>
+        </div>
     </div>
-</header>
-<div class="container">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }}">
-              {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-    {% block content %}
-    {% endblock %}
-</div>
+</nav>
+
+<main role="main" class="container mt-4">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
